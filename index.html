@@ -1,0 +1,231 @@
+<canvas id="myChart" width="1200" height="500"></canvas>
+
+<canvas id="myChartcsv" width="1200" height="500"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js"></script>
+
+<script>
+$(document).ready(function() {	
+
+var json = JSON.parse($.getJSON({'url': "data.json", 'async': false}).responseText);
+  var labels=[];
+ $.each(json, function (key, data) {
+   labels.push(key);
+});
+
+var data1=[];
+var data2=[];
+var data3=[];
+var label1='sea_surface_wave_from_direction_at_variance_spectral_density_maximum';
+var label2='surface_sea_water_speed';
+var label3='sea_surface_wave_maximum_height';
+for (let lab of labels) {
+  var val_data=json[lab];
+  var d2=val_data[label2];
+  var d3=val_data[label3];
+  var d1=val_data[label1];
+  
+  if(typeof(d1)==='undefined'){
+   data1.push(null);
+  }else{
+   data1.push(d1);
+  }
+  if(typeof(d2)=='undefined'){
+   data2.push(null);
+  }else{
+   data2.push(d2);
+  }
+  if(typeof(d3)=='undefined'){
+   data3.push(null);
+  }else{
+   data3.push(d3);
+  }
+ 
+}
+function csvJSON(csv){
+
+  var lines=csv.split("\n");
+
+  var result = [];
+
+  var headers=lines[0].split(",");
+
+  for(var i=1;i<lines.length;i++){
+
+	  var obj = {};
+	  var currentline=lines[i].split(",");
+
+	  for(var j=0;j<headers.length;j++){
+		  obj[headers[j]] = currentline[j];
+	  }
+
+	  result.push(obj);
+
+  }
+  
+  //return result; //JavaScript object
+  return result; //JSON
+}
+var csvlabels=[];
+var jsonobject
+$.ajax("data.csv", {
+    success: function(data) {
+        var jsonobject = csvJSON(data);
+		
+		var clabels=[];
+		var cdata1=[];
+        var cdata2=[];
+        var cdata3=[];
+		var cdata4=[];
+		var clabel='datetime';
+        var clabel1='sea_surface_wave_significant_height';
+        var clabel2='wind_from_direction_at_10m_above_ground_level';
+        var clabel3='wind_speed_at_10m_above_ground_level';
+		var clabel4='air_temperature_at_2m_above_ground_level';
+		 $.each(jsonobject, function(idx, obj) {
+			  var d2=obj[clabel2];
+			  var d3=obj[clabel3];
+			  var d1=obj[clabel1];
+			  var d4=obj[clabel4];
+			  var d=obj[clabel];
+			   
+			  if(typeof(d)==='undefined'){
+			   clabels.push(null);
+			  }else{
+			   clabels.push(d);
+			  }
+			  if(typeof(d1)==='undefined'){
+			   cdata1.push(null);
+			  }else{
+			   cdata1.push(d1);
+			  }
+			  if(typeof(d2)=='undefined'){
+			   cdata2.push(null);
+			  }else{
+			   cdata2.push(d2);
+			  }
+			  if(typeof(d3)=='undefined'){
+			   cdata3.push(null);
+			  }else{
+			   cdata3.push(d3);
+			  }
+			  if(typeof(d4)=='undefined'){
+			   cdata4.push(null);
+			  }else{
+			   cdata4.push(d4);
+			  }
+			
+		 });
+		console.log(clabels);  
+		 var csv_data ={
+        labels: clabels,
+        datasets: [{
+            label: clabel1,
+            data: cdata1,
+			 borderColor: "#36a2eb",
+              fill: false
+           },{
+            label: clabel2,
+            data: cdata2,
+			borderColor: "#ff6384",
+            fill: false
+           },
+		   {
+            label: clabel3,
+            data: cdata3,
+			borderColor: "#4bc0c0",
+             fill: false
+           },{
+            label: clabel4,
+            data: cdata4,
+			borderColor: "#424277",
+             fill: false
+           }]
+    };
+	csv_charts(csv_data)	
+    },
+    error: function() {
+        // Show some error message, couldn't get the CSV file
+    }
+});
+
+var json_data ={
+        labels: labels,
+        datasets: [{
+            label: label1,
+            data: data1,
+			 borderColor: "#4bc0c0",
+              fill: false,
+
+           },{
+            label: label2,
+            data: data2,
+			borderColor: "#ff6384",
+            fill: false
+           },
+		   {
+            label: label3,
+            data: data3,
+			borderColor: "#36a2eb",
+             fill: false
+           }]
+    };
+
+var ctx = document.getElementById("myChart").getContext('2d');
+var ctx2 = document.getElementById("myChartcsv").getContext('2d');
+
+function csv_charts(csv_data){
+
+  var myChart = new Chart(ctx2, {
+    type: 'line',
+    data:csv_data ,
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        },
+		 title: {
+            display: true,
+            text: 'CSV File'
+        }
+    }
+});
+
+
+
+}
+
+
+ 
+var myChart = new Chart(ctx, {
+    type: 'line',
+    data:json_data ,
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        },
+		 title: {
+            display: true,
+            text: 'Json File'
+        }
+    }
+});
+
+
+
+
+
+
+
+
+
+});
+
+</script>
